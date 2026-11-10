@@ -1,0 +1,11 @@
+# Ejecución del notebook
+selenium>=4.20
+beautifulsoup4>=4.12
+requests>=2.31
+pandas>=2.0
+# Ejecución automatizada y pruebas (CI)
+jupyter-core
+nbformat>=5.9
+nbconvert>=7.16
+ipykernel>=6.29
+pytest>=8.0

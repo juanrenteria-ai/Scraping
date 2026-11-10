@@ -1,0 +1,95 @@
+name: CI/CD - Scraping MercadoLibre
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 13 1 * *"      # día 1 de cada mes, 13:00 UTC (8:00 a. m. en Colombia)
+  workflow_dispatch:           # ejecución manual desde la pestaña Actions
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # 1) Integración continua: validar el notebook y probar el analizador (sin red)
+  test:
+    name: Pruebas automatizadas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+      - name: Ejecutar pruebas (pytest)
+        run: pytest -v
+
+  # 2) Ejecución del notebook y generación del reporte
+  run-notebook:
+    name: Ejecutar notebook
+    needs: test
+    runs-on: ubuntu-latest
+    env:
+      # push / pull request -> offline (cero peticiones al sitio)
+      # ejecución programada o manual -> en_vivo (una sola consulta, con robots.txt y pausa)
+      SCRAPING_MODO: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'en_vivo' || 'offline' }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+      - name: Versión de Chrome del runner
+        run: google-chrome --version
+      - name: Ejecutar el notebook (nbconvert)
+        run: |
+          mkdir -p executed
+          jupyter nbconvert --to notebook --execute \
+            --ExecutePreprocessor.timeout=600 \
+            scraping_mercadolibre.ipynb \
+            --output-dir executed --output scraping_mercadolibre_ejecutado.ipynb
+      - name: Convertir resultado a HTML
+        run: |
+          jupyter nbconvert --to html executed/scraping_mercadolibre_ejecutado.ipynb \
+            --output index.html --output-dir _site
+          cp -f precios_iphone_17_pro_max.csv _site/ 2>/dev/null || true
+      - name: Guardar resultados como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultados-notebook
+          path: |
+            executed/
+            precios_iphone_17_pro_max.csv
+          if-no-files-found: warn
+      - name: Preparar sitio para GitHub Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  # 3) Despliegue continuo: publicar el reporte en GitHub Pages (solo desde main)
+  deploy:
+    name: Desplegar en GitHub Pages
+    needs: run-notebook
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Desplegar
+        id: deployment
+        uses: actions/deploy-pages@v5

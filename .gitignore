@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Resultados generados por la ejecución (se publican como artefactos, no se versionan)
+precios_iphone_17_pro_max.csv
+executed/
+_site/
+
+# Sistema
+.DS_Store
+Thumbs.db

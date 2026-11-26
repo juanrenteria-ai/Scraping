@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Precios de iPhone en MercadoLibre Colombia</title>
+  <meta name="description" content="Resultados de un ejercicio académico de web scraping ético sobre el listado de iPhone en MercadoLibre Colombia.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="cabecera">
+    <div class="contenedor">
+      <p class="etiqueta">Programación para Análisis de Datos · IU Digital de Antioquia</p>
+      <h1>Precios de iPhone en MercadoLibre Colombia</h1>
+      <p class="subtitulo">Artículos obtenidos con web scraping ético (Selenium + BeautifulSoup) y publicados con GitHub Actions y GitHub Pages.</p>
+      <p class="fecha" id="fecha-captura"></p>
+    </div>
+  </header>
+
+  <main class="contenedor">
+    <section aria-labelledby="t-resumen">
+      <h2 id="t-resumen" class="oculto">Resumen</h2>
+      <div class="resumen" id="resumen" aria-live="polite"></div>
+    </section>
+
+    <section aria-labelledby="t-articulos">
+      <div class="barra">
+        <h2 id="t-articulos">Artículos</h2>
+        <div class="controles">
+          <label>Buscar <input type="search" id="buscar" placeholder="Modelo, color…"></label>
+          <label>Ordenar por
+            <select id="orden">
+              <option value="posicion">Posición en el listado</option>
+              <option value="precio-asc">Precio: menor a mayor</option>
+              <option value="precio-desc">Precio: mayor a menor</option>
+              <option value="descuento-desc">Mayor descuento</option>
+            </select>
+          </label>
+          <label class="check"><input type="checkbox" id="solo-descuento"> Solo con descuento</label>
+        </div>
+      </div>
+      <p id="estado" role="status"></p>
+      <div class="rejilla" id="rejilla"></div>
+    </section>
+
+    <section aria-labelledby="t-tabla">
+      <h2 id="t-tabla">Datos en tabla</h2>
+      <p class="nota">Misma información de <a href="data/articulos.csv">data/articulos.csv</a> (descargable). Valores en pesos colombianos (COP).</p>
+      <div class="tabla-envoltorio">
+        <table id="tabla">
+          <thead>
+            <tr><th>#</th><th>Artículo</th><th class="num">Sin descuento</th><th class="num">Con descuento</th><th class="num">Descuento</th><th>Origen</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="aviso" aria-labelledby="t-etica">
+      <h2 id="t-etica">Uso ético de los datos</h2>
+      <p>Los datos son públicos y se usan solo con fines académicos. Se consultó <code>robots.txt</code>, se aplicaron pausas, no se evadieron controles del sitio y cada ejecución automatizada hace como máximo dos cargas de página.
+         Los precios cambian con el tiempo, el vendedor y la ubicación; no son una oferta ni una recomendación de compra.
+         Las imágenes y los nombres pertenecen a MercadoLibre y a sus vendedores.</p>
+      <p><a href="reporte/">Ver el reporte del notebook ejecutado</a> ·
+         <a href="https://github.com/juanrenteria-ai/Scraping">Código fuente en GitHub</a></p>
+    </section>
+  </main>
+
+  <footer class="pie"><div class="contenedor">Proyecto académico · Juan Felipe Valencia Renteria</div></footer>
+  <script src="app.js"></script>
+</body>
+</html>

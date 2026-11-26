@@ -61,14 +61,16 @@ jobs:
       - name: Convertir resultado a HTML
         run: |
           jupyter nbconvert --to html executed/scraping_mercadolibre_ejecutado.ipynb \
-            --output index.html --output-dir _site
-          cp -f precios_iphone_17_pro_max.csv _site/ 2>/dev/null || true
+            --output reporte.html --output-dir executed
+      - name: Construir el sitio web (HTML + CSS + JS + CSV)
+        run: python scripts/construir_sitio.py --reporte executed/reporte.html --salida _site
       - name: Guardar resultados como artefacto
         uses: actions/upload-artifact@v4
         with:
           name: resultados-notebook
           path: |
             executed/
+            data/articulos.csv
             precios_iphone_17_pro_max.csv
           if-no-files-found: warn
       - name: Preparar sitio para GitHub Pages
@@ -77,7 +79,7 @@ jobs:
         with:
           path: _site
 
-  # 3) Despliegue continuo: publicar el reporte en GitHub Pages (solo desde main)
+  # 3) Despliegue continuo: publicar el sitio web y el reporte en GitHub Pages (solo desde main)
   deploy:
     name: Desplegar en GitHub Pages
     needs: run-notebook
